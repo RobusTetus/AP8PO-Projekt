@@ -30,6 +30,7 @@ const BOT_NAMES: Array[String] = [
 var _spawn_idx: int = 0
 var _match_time: float = MATCH_DURATION
 var _match_active: bool = true
+var _match_sync_timer: float = 0.0
 
 # Game mode: 0 = FFA, 1 = Team Deathmatch
 var game_mode: int = 0
@@ -84,6 +85,10 @@ func _process(delta: float) -> void:
 		return
 
 	_match_time -= delta
+	_match_sync_timer -= delta
+	if _match_sync_timer <= 0.0:
+		_match_sync_timer = 0.25
+		_sync_match_time.rpc(_match_time, _match_active)
 	if _match_time <= 0:
 		_end_match()
 
@@ -197,6 +202,7 @@ func _request_spawn_from_server() -> void:
 	if NetworkManager.players.has(peer_id):
 		_spawn_player(peer_id)
 	_send_existing_players(peer_id)
+	_sync_match_time.rpc_id(peer_id, _match_time, _match_active)
 
 
 func _send_existing_players(peer_id: int) -> void:
@@ -256,6 +262,7 @@ func on_player_killed(victim_id: int, killer_id: int) -> void:
 	_show_kill_feed.rpc(killer_name, victim_name)
 	if killer_node:
 		killer_node.kills += 1
+		_sync_player_score(killer_id)
 		# Update team score in TDM
 		if game_mode == 1 and killer_node.team > 0:
 			team_scores[killer_node.team] += 1
@@ -286,12 +293,22 @@ func _show_kill_feed_local(killer: String, victim: String) -> void:
 		hud.show_kill(killer, victim)
 
 
+func _sync_player_score(peer_id: int) -> void:
+	if NetworkManager.is_bot_practice_mode:
+		return
+	var player := players_node.get_node_or_null(str(peer_id))
+	if player == null or not player.has_method("sync_score"):
+		return
+	player.sync_score.rpc(player.kills, player.deaths)
+
+
 func _end_match() -> void:
 	_match_active = false
 	var winner := _determine_winner()
 	if NetworkManager.is_bot_practice_mode:
 		_show_match_end(winner)
 	else:
+		_sync_match_time.rpc(_match_time, _match_active)
 		_show_match_end.rpc(winner)
 
 
@@ -308,6 +325,12 @@ func _determine_winner() -> String:
 		if data.size() > 0:
 			return "%s Wins with %d kills!" % [data[0].name, data[0].kills]
 		return "Match Over!"
+
+
+@rpc("authority", "reliable")
+func _sync_match_time(time_left: float, is_active: bool) -> void:
+	_match_time = time_left
+	_match_active = is_active
 
 
 @rpc("authority", "call_local", "reliable")

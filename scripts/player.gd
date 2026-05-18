@@ -665,12 +665,12 @@ func receive_hit(amount: int, attacker_id: int, attack_type: int = AttackType.SL
 
 	if NetworkManager.is_bot_practice_mode:
 		_broadcast_health(health)
-		_notify_hit(attacker_id)
+		_send_hit_notification(attacker_id)
 		if health == 0:
 			_broadcast_death(attacker_id)
 	else:
 		_broadcast_health.rpc(health)
-		_notify_hit.rpc_id(player_peer_id, attacker_id)
+		_send_hit_notification(attacker_id)
 		if health == 0:
 			_apply_death(attacker_id)
 			_broadcast_death.rpc(attacker_id)
@@ -695,12 +695,12 @@ func receive_kick(_amount: int, attacker_id: int) -> void:
 
 	if NetworkManager.is_bot_practice_mode:
 		_broadcast_health(health)
-		_notify_hit(attacker_id)
+		_send_hit_notification(attacker_id)
 		if health == 0:
 			_broadcast_death(attacker_id)
 	else:
 		_broadcast_health.rpc(health)
-		_notify_hit.rpc_id(player_peer_id, attacker_id)
+		_send_hit_notification(attacker_id)
 		if health == 0:
 			_apply_death(attacker_id)
 			_broadcast_death.rpc(attacker_id)
@@ -720,11 +720,30 @@ func _notify_hit(attacker_id: int) -> void:
 		hit_received.emit(attacker.global_position)
 
 
+func _send_hit_notification(attacker_id: int) -> void:
+	if NetworkManager.is_bot_practice_mode:
+		_notify_hit(attacker_id)
+		return
+
+	if player_peer_id == multiplayer.get_unique_id():
+		_notify_hit(attacker_id)
+	else:
+		_notify_hit.rpc_id(player_peer_id, attacker_id)
+
+
 @rpc("any_peer", "reliable")
 func _broadcast_health(new_health: int) -> void:
 	if not _is_server_authorized_rpc():
 		return
 	health = new_health
+
+
+@rpc("any_peer", "reliable")
+func sync_score(new_kills: int, new_deaths: int) -> void:
+	if not _is_server_authorized_rpc():
+		return
+	kills = new_kills
+	deaths = new_deaths
 
 
 func _apply_death(killer_id: int) -> void:
