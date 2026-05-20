@@ -1,0 +1,10 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://df2mc4m2dhy7d"]
+
+[ext_resource type="Texture2D" uid="uid://dvopbsmbyi7b" path="res://assets/textures/patterned_brick_wall_02_diff_4k.jpg" id="1_m6k3d"]
+[ext_resource type="Texture2D" uid="uid://df706d7finop3" path="res://assets/textures/patterned_brick_wall_02_disp_4k.png" id="2_rj7ln"]
+
+[resource]
+albedo_texture = ExtResource("1_m6k3d")
+heightmap_enabled = true
+heightmap_texture = ExtResource("2_rj7ln")
+uv1_scale = Vector3(2, 5, 1)

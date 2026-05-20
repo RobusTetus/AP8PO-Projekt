@@ -1,0 +1,10 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://yefgu4a5cu6h"]
+
+[ext_resource type="Texture2D" uid="uid://csk44g815p073" path="res://assets/textures/medieval_wall_02_diff_4k.jpg" id="1_svj85"]
+[ext_resource type="Texture2D" uid="uid://b5xxudpidyon0" path="res://assets/textures/medieval_wall_02_disp_4k.png" id="2_ldkc1"]
+
+[resource]
+albedo_texture = ExtResource("1_svj85")
+heightmap_enabled = true
+heightmap_texture = ExtResource("2_ldkc1")
+uv1_scale = Vector3(20, 2, 1)

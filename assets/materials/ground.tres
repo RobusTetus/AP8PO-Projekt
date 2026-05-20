@@ -1,0 +1,10 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://63ueafgygyle"]
+
+[ext_resource type="Texture2D" uid="uid://j8s48cvphtea" path="res://assets/textures/coast_sand_rocks_02_diff_4k.jpg" id="1_jgrjp"]
+[ext_resource type="Texture2D" uid="uid://x72vb0ss3dfd" path="res://assets/textures/coast_sand_rocks_02_disp_4k.png" id="2_47y7m"]
+
+[resource]
+albedo_texture = ExtResource("1_jgrjp")
+heightmap_enabled = true
+heightmap_texture = ExtResource("2_47y7m")
+uv1_scale = Vector3(10, 10, 10)
